@@ -1,1 +1,1 @@
-# dnd-spells-api
+# dnd-api
