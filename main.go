@@ -1,18 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"github.com/creztfallen/dnd-spells-api/configs"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	handler := func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Hello, world!")
-	}
+	app := fiber.New()
 
-	http.HandleFunc("/hello", handler)
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		panic(err)
-	}
+	configs.ConnectDB()
+
+	app.Listen(":6000")
 }
