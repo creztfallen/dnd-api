@@ -1,4 +1,4 @@
-module github.com/creztfallen/dnd-spells-api
+module github.com/dnd-api
 
 go 1.18
 

@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/creztfallen/dnd-spells-api/configs"
+	dtos "github.com/dnd-api/DTOs"
+	"github.com/dnd-api/configs"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,14 +22,14 @@ func CreateSpell(c *fiber.Ctx) error {
 	defer cancel()
 
 	if err := c.BodyParser(&spell); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(SpellResponse{
+		return c.Status(http.StatusBadRequest).JSON(dtos.Response{
 			Status:  http.StatusBadRequest,
 			Message: "error",
 			Data:    &fiber.Map{"data": err.Error()}})
 	}
 
 	if validationErr := validate.Struct(&spell); validationErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(SpellResponse{
+		return c.Status(http.StatusBadRequest).JSON(dtos.Response{
 			Status:  http.StatusBadRequest,
 			Message: "error",
 			Data:    &fiber.Map{"data": validationErr.Error()}})
@@ -49,13 +50,13 @@ func CreateSpell(c *fiber.Ctx) error {
 
 	result, err := spellCollection.InsertOne(ctx, newSpell)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(SpellResponse{
+		return c.Status(http.StatusInternalServerError).JSON(dtos.Response{
 			Status:  http.StatusInternalServerError,
 			Message: "error",
 			Data:    &fiber.Map{"data": err.Error()}})
 	}
 
-	return c.Status(http.StatusCreated).JSON(SpellResponse{
+	return c.Status(http.StatusCreated).JSON(dtos.Response{
 		Status:  http.StatusCreated,
 		Message: "success",
 		Data:    &fiber.Map{"data": result}})
