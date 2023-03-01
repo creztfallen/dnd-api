@@ -9,6 +9,7 @@ import (
 	"github.com/dnd-api/configs"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -54,4 +55,39 @@ func CreateClass(c *fiber.Ctx) error {
 		Status:  http.StatusCreated,
 		Message: "success",
 		Data:    &fiber.Map{"data": result}})
+}
+
+func getAllClasses(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var classes []Classes
+	defer cancel()
+
+	results, err := classCollection.Find(ctx, bson.M{})
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dtos.Response{
+			Status:  http.StatusInternalServerError,
+			Message: "error",
+			Data:    &fiber.Map{"data": err.Error()}})
+	}
+
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleClass Classes
+		if err = results.Decode(&singleClass); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(dtos.Response{
+				Status:  http.StatusInternalServerError,
+				Message: "error",
+				Data:    &fiber.Map{"data": err.Error()}})
+		}
+
+		classes = append(classes, singleClass)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		dtos.Response{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    &fiber.Map{"data": classes}},
+	)
 }
